@@ -26,29 +26,46 @@ int MaxHeap::top() const {
 
 bool MaxHeap::contains(int value) const {
     for (int item : data_) {
-        if (item == value) {
-            return true;
-        }
-    }
-    return false;
+        if (item == value) return true;
+    } return false;
 }
 
 void MaxHeap::push(int value) {
-    (void)value;
-    throw std::logic_error("Student implementation required: push");
+    data_.push_back(value);
+    if (data_.size() > 1) heapifyUp(data_.size() - 1);
 }
 
 int MaxHeap::pop() {
-    throw std::logic_error("Student implementation required: pop");
+    if (data_.empty()) throw(std::logic_error("Pop on empty"));
+    int popped = data_.front();
+    data_.front() = data_.back();
+    data_.pop_back();
+    if (data_.size() > 1) heapifyDown(0);
+    return popped;
 }
 
 void MaxHeap::buildHeap(const std::vector<int>& values) {
-    (void)values;
-    throw std::logic_error("Student implementation required: buildHeap");
+    data_.clear();
+    for (int i : values) push(i);
 }
 
 std::vector<int> MaxHeap::heapSort() {
-    throw std::logic_error("Student implementation required: heapSort");
+    std::vector<int> sorted = data_;
+    std::size_t progress = 1; //sorting progress
+    while (progress < sorted.size()) { //auto checks if size big enough for sort
+        std::size_t index = 0;
+        std::swap(sorted.front(), sorted[sorted.size() - progress]);
+        progress ++;
+        while (leftChildIndex(index) < sorted.size() - progress) { //heapify down with progressive boundary
+            int rightG = 0;
+            if (rightChildIndex(index) < sorted.size() - progress) {
+                rightG = (sorted[leftChildIndex(index)] > sorted[rightChildIndex(index)]) ? 0 : 1;
+            } //is right greater
+            if (sorted[index] < sorted[leftChildIndex(index)+rightG]) swap(sorted[index], sorted[leftChildIndex(index)+rightG]);
+            else break;
+            index = leftChildIndex(index)+rightG;
+        }
+    } return sorted;
 }
 
 std::vector<int> MaxHeap::toVector() const {
@@ -71,13 +88,22 @@ std::size_t MaxHeap::rightChildIndex(std::size_t index) {
 }
 
 void MaxHeap::heapifyUp(std::size_t index) {
-    (void)index;
-    throw std::logic_error("Student implementation required: heapifyUp");
+    while (index > 0 && data_[index] > data_[parentIndex(index)]){
+        swap(data_[index], data_[parentIndex(index)]);
+        index = parentIndex(index);
+    } return;
 }
 
 void MaxHeap::heapifyDown(std::size_t index) {
-    (void)index;
-    throw std::logic_error("Student implementation required: heapifyDown");
+    while (leftChildIndex(index) < data_.size()) { //try as long as a child exists to compare
+        int rightG = 0;
+        if (rightChildIndex(index) < data_.size()) { //check if right exists for comparison
+            rightG = (data_[leftChildIndex(index)] > data_[rightChildIndex(index)]) ? 0 : 1;
+        } //is right greater
+        if (data_[index] < data_[leftChildIndex(index)+rightG]) swap(data_[index], data_[leftChildIndex(index)+rightG]);
+        else return;
+        index = leftChildIndex(index)+rightG;
+    } return;
 }
 
 void MaxHeap::swap(int& a, int& b) {
